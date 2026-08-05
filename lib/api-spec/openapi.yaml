@@ -3,13 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Sistema de facturación para lavandería
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clientes
+    description: Gestión de clientes
+  - name: servicios
+    description: Catálogo de servicios
+  - name: ordenes
+    description: Órdenes de lavandería
+  - name: facturas
+    description: Facturación y pagos
+  - name: dashboard
+    description: Resúmenes y estadísticas
+
 paths:
   /healthz:
     get:
@@ -24,6 +35,465 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Clientes ────────────────────────────────────────────────────────────────
+  /clientes:
+    get:
+      operationId: listClientes
+      tags: [clientes]
+      summary: Listar clientes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cliente"
+    post:
+      operationId: createCliente
+      tags: [clientes]
+      summary: Crear cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteInput"
+      responses:
+        "201":
+          description: Cliente creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+
+  /clientes/{id}:
+    get:
+      operationId: getCliente
+      tags: [clientes]
+      summary: Obtener cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Cliente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+        "404":
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateCliente
+      tags: [clientes]
+      summary: Actualizar cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteUpdate"
+      responses:
+        "200":
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+    delete:
+      operationId: deleteCliente
+      tags: [clientes]
+      summary: Eliminar cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Eliminado
+
+  /clientes/{id}/historial:
+    get:
+      operationId: getClienteHistorial
+      tags: [clientes]
+      summary: Historial de órdenes del cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Historial de órdenes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Orden"
+
+  # ─── Servicios ───────────────────────────────────────────────────────────────
+  /servicios:
+    get:
+      operationId: listServicios
+      tags: [servicios]
+      summary: Listar servicios
+      responses:
+        "200":
+          description: Lista de servicios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Servicio"
+    post:
+      operationId: createServicio
+      tags: [servicios]
+      summary: Crear servicio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicioInput"
+      responses:
+        "201":
+          description: Servicio creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Servicio"
+
+  /servicios/{id}:
+    patch:
+      operationId: updateServicio
+      tags: [servicios]
+      summary: Actualizar servicio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicioUpdate"
+      responses:
+        "200":
+          description: Servicio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Servicio"
+    delete:
+      operationId: deleteServicio
+      tags: [servicios]
+      summary: Eliminar servicio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Eliminado
+
+  # ─── Órdenes ─────────────────────────────────────────────────────────────────
+  /ordenes:
+    get:
+      operationId: listOrdenes
+      tags: [ordenes]
+      summary: Listar órdenes
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            type: string
+            enum: [pendiente, en_proceso, listo, entregado]
+        - name: clienteId
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Lista de órdenes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Orden"
+    post:
+      operationId: createOrden
+      tags: [ordenes]
+      summary: Crear orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrdenInput"
+      responses:
+        "201":
+          description: Orden creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Orden"
+
+  /ordenes/recientes:
+    get:
+      operationId: getOrdenesRecientes
+      tags: [ordenes]
+      summary: Órdenes recientes con detalle
+      responses:
+        "200":
+          description: Órdenes recientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrdenConDetalle"
+
+  /ordenes/{id}:
+    get:
+      operationId: getOrden
+      tags: [ordenes]
+      summary: Obtener orden con items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Orden con items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrdenConDetalle"
+        "404":
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateOrden
+      tags: [ordenes]
+      summary: Actualizar orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrdenUpdate"
+      responses:
+        "200":
+          description: Orden actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Orden"
+    delete:
+      operationId: deleteOrden
+      tags: [ordenes]
+      summary: Eliminar orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Eliminado
+
+  /ordenes/{id}/items:
+    post:
+      operationId: addOrdenItem
+      tags: [ordenes]
+      summary: Agregar item a orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrdenItemInput"
+      responses:
+        "201":
+          description: Item agregado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrdenItem"
+
+  /ordenes/{id}/items/{itemId}:
+    delete:
+      operationId: deleteOrdenItem
+      tags: [ordenes]
+      summary: Eliminar item de orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Eliminado
+
+  # ─── Facturas ────────────────────────────────────────────────────────────────
+  /facturas:
+    get:
+      operationId: listFacturas
+      tags: [facturas]
+      summary: Listar facturas
+      parameters:
+        - name: estadoPago
+          in: query
+          schema:
+            type: string
+            enum: [pendiente, pagado]
+      responses:
+        "200":
+          description: Lista de facturas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Factura"
+    post:
+      operationId: createFactura
+      tags: [facturas]
+      summary: Crear factura para una orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FacturaInput"
+      responses:
+        "201":
+          description: Factura creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Factura"
+
+  /facturas/{id}:
+    get:
+      operationId: getFactura
+      tags: [facturas]
+      summary: Obtener factura
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Factura
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacturaConDetalle"
+        "404":
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /facturas/{id}/pagar:
+    patch:
+      operationId: pagarFactura
+      tags: [facturas]
+      summary: Marcar factura como pagada
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PagoInput"
+      responses:
+        "200":
+          description: Factura pagada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Factura"
+
+  # ─── Dashboard ───────────────────────────────────────────────────────────────
+  /dashboard/resumen:
+    get:
+      operationId: getDashboardResumen
+      tags: [dashboard]
+      summary: Resumen del negocio
+      responses:
+        "200":
+          description: Estadísticas del dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResumen"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +504,350 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    # ─── Cliente ───────────────────────────────────────────────────────────────
+    Cliente:
+      type: object
+      required: [id, nombre, telefono, createdAt]
+      properties:
+        id:
+          type: number
+        nombre:
+          type: string
+        apellido:
+          type: ["string", "null"]
+        telefono:
+          type: string
+        email:
+          type: ["string", "null"]
+        direccion:
+          type: ["string", "null"]
+        notas:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    ClienteInput:
+      type: object
+      required: [nombre, telefono]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        apellido:
+          type: string
+        telefono:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        direccion:
+          type: string
+        notas:
+          type: string
+
+    ClienteUpdate:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        apellido:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        direccion:
+          type: string
+        notas:
+          type: string
+
+    # ─── Servicio ──────────────────────────────────────────────────────────────
+    Servicio:
+      type: object
+      required: [id, nombre, precio, unidad, activo]
+      properties:
+        id:
+          type: number
+        nombre:
+          type: string
+        descripcion:
+          type: ["string", "null"]
+        precio:
+          type: number
+        unidad:
+          type: string
+          description: "Ej: por kilo, por prenda, por par"
+        activo:
+          type: boolean
+
+    ServicioInput:
+      type: object
+      required: [nombre, precio, unidad]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        descripcion:
+          type: string
+        precio:
+          type: number
+          minimum: 0
+        unidad:
+          type: string
+          minLength: 1
+        activo:
+          type: boolean
+
+    ServicioUpdate:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        descripcion:
+          type: string
+        precio:
+          type: number
+          minimum: 0
+        unidad:
+          type: string
+        activo:
+          type: boolean
+
+    # ─── Orden ─────────────────────────────────────────────────────────────────
+    Orden:
+      type: object
+      required: [id, clienteId, estado, total, createdAt]
+      properties:
+        id:
+          type: number
+        clienteId:
+          type: number
+        clienteNombre:
+          type: ["string", "null"]
+        estado:
+          type: string
+          enum: [pendiente, en_proceso, listo, entregado]
+        total:
+          type: number
+        notas:
+          type: ["string", "null"]
+        fechaEntregaEstimada:
+          type: ["string", "null"]
+          format: date-time
+        fechaEntregaReal:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    OrdenConDetalle:
+      type: object
+      required: [id, clienteId, estado, total, items, createdAt]
+      properties:
+        id:
+          type: number
+        clienteId:
+          type: number
+        clienteNombre:
+          type: ["string", "null"]
+        clienteTelefono:
+          type: ["string", "null"]
+        estado:
+          type: string
+          enum: [pendiente, en_proceso, listo, entregado]
+        total:
+          type: number
+        notas:
+          type: ["string", "null"]
+        fechaEntregaEstimada:
+          type: ["string", "null"]
+          format: date-time
+        fechaEntregaReal:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrdenItem"
+        factura:
+          $ref: "#/components/schemas/Factura"
+
+    OrdenInput:
+      type: object
+      required: [clienteId]
+      properties:
+        clienteId:
+          type: number
+        notas:
+          type: string
+        fechaEntregaEstimada:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrdenItemInput"
+
+    OrdenUpdate:
+      type: object
+      properties:
+        estado:
+          type: string
+          enum: [pendiente, en_proceso, listo, entregado]
+        notas:
+          type: string
+        fechaEntregaEstimada:
+          type: string
+          format: date-time
+        fechaEntregaReal:
+          type: string
+          format: date-time
+
+    OrdenItem:
+      type: object
+      required: [id, ordenId, servicioId, cantidad, precioUnitario, subtotal]
+      properties:
+        id:
+          type: number
+        ordenId:
+          type: number
+        servicioId:
+          type: number
+        servicioNombre:
+          type: ["string", "null"]
+        cantidad:
+          type: number
+        precioUnitario:
+          type: number
+        subtotal:
+          type: number
+
+    OrdenItemInput:
+      type: object
+      required: [servicioId, cantidad]
+      properties:
+        servicioId:
+          type: number
+        cantidad:
+          type: number
+          minimum: 0.01
+        precioUnitario:
+          type: number
+          description: Opcional; si se omite se usa el precio del servicio
+
+    # ─── Factura ───────────────────────────────────────────────────────────────
+    Factura:
+      type: object
+      required: [id, ordenId, numeroFactura, total, estadoPago, createdAt]
+      properties:
+        id:
+          type: number
+        ordenId:
+          type: number
+        numeroFactura:
+          type: string
+        total:
+          type: number
+        estadoPago:
+          type: string
+          enum: [pendiente, pagado]
+        metodoPago:
+          type: ["string", "null"]
+          enum: [efectivo, tarjeta, transferencia, null]
+        fechaPago:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    FacturaConDetalle:
+      type: object
+      required: [id, ordenId, numeroFactura, total, estadoPago, createdAt, orden]
+      properties:
+        id:
+          type: number
+        ordenId:
+          type: number
+        numeroFactura:
+          type: string
+        total:
+          type: number
+        estadoPago:
+          type: string
+          enum: [pendiente, pagado]
+        metodoPago:
+          type: ["string", "null"]
+          enum: [efectivo, tarjeta, transferencia, null]
+        fechaPago:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        orden:
+          $ref: "#/components/schemas/OrdenConDetalle"
+
+    FacturaInput:
+      type: object
+      required: [ordenId]
+      properties:
+        ordenId:
+          type: number
+
+    PagoInput:
+      type: object
+      required: [metodoPago]
+      properties:
+        metodoPago:
+          type: string
+          enum: [efectivo, tarjeta, transferencia]
+
+    # ─── Dashboard ─────────────────────────────────────────────────────────────
+    DashboardResumen:
+      type: object
+      required:
+        [
+          ordenesHoy,
+          ordenesPendientes,
+          ordenesEnProceso,
+          ordenesListas,
+          ingresosHoy,
+          ingresosMes,
+          clientesTotales,
+          facturasPendientes,
+        ]
+      properties:
+        ordenesHoy:
+          type: number
+        ordenesPendientes:
+          type: number
+        ordenesEnProceso:
+          type: number
+        ordenesListas:
+          type: number
+        ingresosHoy:
+          type: number
+        ingresosMes:
+          type: number
+        clientesTotales:
+          type: number
+        facturasPendientes:
+          type: number
+        facturasPendientesMonto:
+          type: number

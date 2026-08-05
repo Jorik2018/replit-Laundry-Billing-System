@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Sistema de Facturación - Lavandería"
+description = "Sistema de facturación para lavanderías. Permite registrar clientes, gestionar órdenes de lavado con múltiples servicios (lavado, secado, planchado, etc.), generar facturas y llevar un historial completo de transacciones."
+version = "1.0.0"
+id = "artifacts/lavanderia"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21164
+
+[services.development]
+run = "pnpm --filter @workspace/lavanderia run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lavanderia", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lavanderia/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21164"
+BASE_PATH = "/"
