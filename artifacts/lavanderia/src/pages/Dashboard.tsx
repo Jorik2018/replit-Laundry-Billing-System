@@ -86,7 +86,7 @@ export default function Dashboard() {
     { name: "En Proceso", valor: resumen.ordenesEnProceso, color: "hsl(221, 83%, 53%)" },
     { name: "Listas", valor: resumen.ordenesListas, color: "hsl(142, 71%, 45%)" },
   ];
-
+console.log("Resumen:", recientes);
   return (
     <div className="space-y-8 pb-8">
       <div className="flex items-center justify-between">

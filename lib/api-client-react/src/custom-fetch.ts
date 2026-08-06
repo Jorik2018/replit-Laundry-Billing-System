@@ -60,6 +60,7 @@ function isUrl(input: RequestInfo | URL): input is URL {
   return typeof URL !== "undefined" && input instanceof URL;
 }
 
+
 function applyBaseUrl(input: RequestInfo | URL): RequestInfo | URL {
   if (!_baseUrl) return input;
   const url = resolveUrl(input);
