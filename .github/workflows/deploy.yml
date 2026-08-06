@@ -1,0 +1,60 @@
+name: Deploy Lavandería to FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Habilitar pnpm
+        run: corepack enable
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar aplicación de lavandería
+        env:
+          # Debe ser /erp/ si publicarás la app en https://tudominio.com/erp/
+          BASE_PATH: ${{ secrets.VITE_BASE }}
+
+          # URL pública de tu backend/API en producción.
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+          VITE_LOGIN_PATH: /simple-jwt-login/v1/auth
+          VITE_REMOTE_PATH: ${{ secrets.VITE_REMOTE_PATH }}
+        run: pnpm --dir artifacts/lavanderia build
+
+      - name: Crear archivo .htaccess para React/Vite
+        env:
+          BASE_PATH: ${{ secrets.VITE_BASE }}
+        run: |
+          cat > artifacts/lavanderia/dist/public/.htaccess <<EOF
+          RewriteEngine On
+
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule ^ index.html [L]
+          EOF
+
+      - name: Subir archivos por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: artifacts/lavanderia/dist/public/
+          server-dir: /erp/
