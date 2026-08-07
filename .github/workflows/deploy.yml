@@ -66,4 +66,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: artifacts/lavanderia/dist/public/
-          server-dir: /erp/
+          server-dir: /laundry.dbasure.com/
