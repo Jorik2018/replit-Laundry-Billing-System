@@ -38,7 +38,7 @@ jobs:
       - name: Compilar aplicación de lavandería
         env:
           # Debe ser /erp/ si publicarás la app en https://tudominio.com/erp/
-          BASE_PATH: ${{ secrets.VITE_BASE }}
+          BASE_PATH: /
           BASE_URL: /
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_LOGIN_PATH: /simple-jwt-login/v1/auth
