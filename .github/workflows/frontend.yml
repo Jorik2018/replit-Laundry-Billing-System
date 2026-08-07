@@ -16,7 +16,7 @@ jobs:
       - name: Configurar pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.17.1
           run_install: false
 
       - name: Configurar Node.js
@@ -34,23 +34,18 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-
       - name: Compilar aplicación de lavandería
         env:
-          # Debe ser /erp/ si publicarás la app en https://tudominio.com/erp/
           BASE_PATH: /
           BASE_URL: /
           VITE_API_URL: https://api-server-latest-0wlb.onrender.com
-          #${{ secrets.VITE_API_URL }}
           VITE_LOGIN_PATH: /simple-jwt-login/v1/auth
           VITE_REMOTE_PATH: ${{ secrets.VITE_REMOTE_PATH }}
         run: pnpm --dir artifacts/lavanderia build
 
       - name: Crear archivo .htaccess para React/Vite
-        env:
-          BASE_PATH: ${{ secrets.VITE_BASE }}
         run: |
-          cat > artifacts/lavanderia/dist/public/.htaccess <<EOF
+          cat > artifacts/lavanderia/dist/public/.htaccess <<'EOF'
           RewriteEngine On
 
           RewriteCond %{REQUEST_FILENAME} !-f
