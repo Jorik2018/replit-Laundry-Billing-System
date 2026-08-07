@@ -40,10 +40,7 @@ jobs:
           # Debe ser /erp/ si publicarás la app en https://tudominio.com/erp/
           BASE_PATH: ${{ secrets.VITE_BASE }}
           BASE_URL: /
-
-          # URL pública de tu backend/API en producción.
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-
           VITE_LOGIN_PATH: /simple-jwt-login/v1/auth
           VITE_REMOTE_PATH: ${{ secrets.VITE_REMOTE_PATH }}
         run: pnpm --dir artifacts/lavanderia build
