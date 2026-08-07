@@ -39,7 +39,7 @@ jobs:
         env:
           # Debe ser /erp/ si publicarás la app en https://tudominio.com/erp/
           BASE_PATH: ${{ secrets.VITE_BASE }}
-          BASE_URL: ${{ secrets.VITE_BASE }}
+          BASE_URL: /
 
           # URL pública de tu backend/API en producción.
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
